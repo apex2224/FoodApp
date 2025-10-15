@@ -1,0 +1,61 @@
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import CartItem from './CartItem';
+import Modal from '../UI/Modal';
+import classes from './Cart.module.css';
+import { useCart } from '../../store/CartContext';
+
+const Cart = (props) => {
+  const [isOrdering, setIsOrdering] = useState(false);
+  const cartCtx = useCart();
+
+  const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
+  const hasItems = cartCtx.items.length > 0;
+
+  const cartItemAddHandler = (item) => {
+    cartCtx.addItem({ ...item, amount: 1 });
+  };
+
+  const cartItemRemoveHandler = (id) => {
+    cartCtx.removeItem(id);
+  };
+
+  const orderHandler = () => {
+    setIsOrdering(true);
+  };
+
+  const cartItems = (
+    <ul className={classes['cart-items']}>
+      {cartCtx.items.map((item) => (
+        <CartItem
+          key={item.id}
+          item={item}
+          onAdd={cartItemAddHandler.bind(null, item)}
+          onRemove={cartItemRemoveHandler.bind(null, item.id)}
+        />
+      ))}
+    </ul>
+  );
+
+  const modalActions = (
+    <div className={classes.actions}>
+      <button className={classes['button--alt']} onClick={props.onClose}>
+        Close
+      </button>
+      {hasItems && <button className={classes.button} onClick={orderHandler}>Order</button>}
+    </div>
+  );
+
+  return (
+    <Modal onClose={props.onClose}>
+      {cartItems}
+      <div className={classes.total}>
+        <span>Total Amount</span>
+        <span>{totalAmount}</span>
+      </div>
+      {modalActions}
+    </Modal>
+  );
+};
+
+export default Cart;
